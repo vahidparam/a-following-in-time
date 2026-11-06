@@ -40,7 +40,7 @@ export class PoliticalContext {
     this.markers = [...$('plot-events').children];
   }
 
-  draw(series, day, scale, cross = null) {
+  draw(series, day, scale, cross = null, filtered = false) {
     const { start, end } = scale;
     const active = eventAt(day, this.events);
     const width = $('plot').clientWidth;
@@ -64,7 +64,7 @@ export class PoliticalContext {
       marker.querySelector('.event-rule').style.left = `${x}px`;
     });
     this.drawGap(series, scale, width);
-    this.describe(series, cross || active, Boolean(cross));
+    this.describe(series, cross || active, Boolean(cross), filtered);
   }
 
   drawGap(series, scale, width) {
@@ -75,8 +75,8 @@ export class PoliticalContext {
     gap.classList.toggle('is-wide', (1 - left) * width > 130);
   }
 
-  describe(series, event, cross = false) {
-    const key = `${series.handle}-${cross}-${event?.id}`;
+  describe(series, event, cross = false, filtered = false) {
+    const key = `${series.handle}-${cross}-${filtered}-${event?.id}`;
     if (key === this.descriptionKey) return;
     this.descriptionKey = key;
     $('context-date').textContent = event ? dateFormat.format(event.day * DAY) : 'POLITICAL CONTEXT';
@@ -89,7 +89,7 @@ export class PoliticalContext {
     } else $('context-date').removeAttribute('datetime');
     let description = 'Scroll, or select a plot marker to explore a moment.';
     if (cross) {
-      description = `${percent(event.baselineShare)} → ${percent(event.share)} cross-ideology share · ${event.rateRatio.toFixed(1)}× the prior daily arrival rate`;
+      description = `${filtered ? 'Cross-ideology users only' : 'Everyone shown'} · ${percent(event.baselineShare)} → ${percent(event.share)} cross-ideology share · ${event.rateRatio.toFixed(1)}× prior rate`;
     } else if (event) {
       const { before, after } = eventComparison(series, event);
       description = before !== null && after !== null

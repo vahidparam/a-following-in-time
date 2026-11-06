@@ -36,15 +36,32 @@ export function mixWithinDays(scores, counts) {
   return scores;
 }
 
-export function loadIdeology(series) {
+export function loadIdeology(series, progress) {
+  series.scoreProgress = progress;
   if (!series.scorePromise) series.scorePromise = (async () => {
-    const response = await fetch(new URL(`./data/${series.ideology.file}`, import.meta.url));
-    if (!response.ok) throw new Error(`Ideology request returned ${response.status}`);
-    const stream = response.body.pipeThrough(new DecompressionStream('gzip'));
-    series.scores = mixWithinDays(decodeIdeology(await new Response(stream).arrayBuffer(), series.total), series.counts);
+    const buffer = await loadCompressed(new URL(`./data/${series.ideology.file}`, import.meta.url), series.ideology.compressedBytes, (...args) => series.scoreProgress?.(...args));
+    series.scores = mixWithinDays(decodeIdeology(buffer, series.total), series.counts);
     return series.scores;
   })().catch(error => { delete series.scorePromise; throw error; });
   return series.scorePromise;
+}
+
+export function crossIndices(series, { start, end, sign }) {
+  const indices = [];
+  for (let point = countAt(series, start - 1); point < countAt(series, end - 1); point++) {
+    if (series.scores[point] * sign > 0) indices.push(point);
+  }
+  return new Uint32Array(indices);
+}
+
+export function lowerBound(values, value) {
+  let low = 0, high = values.length;
+  while (low < high) {
+    const middle = (low + high) >>> 1;
+    if (values[middle] < value) low = middle + 1;
+    else high = middle;
+  }
+  return low;
 }
 
 export function makeIdeologyDensity(series) {
@@ -61,3 +78,6 @@ export function makeIdeologyDensity(series) {
   });
   return density;
 }
+import { countAt } from './story-data.mjs';
+import { loadCompressed } from './story-loading.mjs';
+

@@ -11,16 +11,18 @@ function drawCohort(series, feature, sign, spotlight) {
   for (let day = feature.startDay; day <= feature.endDay; day++) {
     for (let point = countAt(series, day - 1); point < countAt(series, day); point++) {
       const score = series.scores[point];
+      if (spotlight && !(score * sign > 0)) continue;
       const fraction = (Math.imul(point + 1, 2654435761) >>> 0) / 4294967296;
       const x = Math.floor((day - feature.startDay + fraction) / 7 * canvas.width);
       const y = Math.floor(ideologyPosition(score) * canvas.height);
       const pixel = (y * canvas.width + x) * 4;
-      const alpha = !spotlight || score * sign > 0 ? 0.55 : 0.025;
+      const alpha = 0.55;
       pixels[pixel] = pixels[pixel + 1] = pixels[pixel + 2] = 255;
       pixels[pixel + 3] = 255 - (255 - pixels[pixel + 3]) * (1 - alpha);
     }
   }
   context.putImageData(image, 0, 0);
+  canvas.setAttribute('aria-label', `${spotlight ? 'Only cross-ideology arrivals' : 'All arrivals'} during this seven-day window. Each dot retains its follow day and ideology score.`);
 }
 
 export class CrossIdeology {
@@ -32,7 +34,7 @@ export class CrossIdeology {
         this.enabled = !this.enabled;
         document.querySelectorAll('[data-cross-toggle]').forEach(button => {
           button.setAttribute('aria-pressed', String(this.enabled));
-          button.textContent = this.enabled ? 'Spotlight on · show everyone ↗' : 'Spotlight the other side ↗';
+          button.textContent = this.enabled ? 'Cross-ideology only · show everyone ↗' : 'Show cross-ideology users only ↗';
         });
         if (this.series) this.paintCohorts();
         redraw();
@@ -74,7 +76,7 @@ export class CrossIdeology {
       const right = clamp(timePosition(feature.endDay + 1, scale), 0, 1);
       marker.style.left = `${left * 100}%`;
       marker.style.width = `max(2px, ${(right - left) * 100}%)`;
-      const mix = Math.min(clamp(time - feature.startDay, 0, 1), clamp((feature.endDay + 3 - time) / 2, 0, 1));
+      const mix = Number(time > feature.startDay && time <= feature.endDay + 1);
       marker.classList.toggle('is-active', mix > 0);
       document.getElementById(`cross-${feature.id}`).classList.toggle('is-cross-active', mix > 0);
       if (mix > 0) this.active = feature;

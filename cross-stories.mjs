@@ -64,13 +64,13 @@ export function crossChapter(moment, next) {
     <h2 tabindex="-1">${moment.heading}</h2>${eventFigure(moment.id)}<p>${moment.text}</p>
     <figure class="cross-evidence">
       <figcaption><strong>${number.format(moment.cross)}</strong><span>cross-ideology arrivals · ${crossDate(moment.start)} — ${crossDate(moment.end)}</span></figcaption>
-      <div class="cross-lens"><canvas width="680" height="280" data-cross-cohort="${moment.id}" aria-label="All arrivals during this seven-day window, magnified. Each dot retains its follow day and ideology score; the opposite side is brighter."></canvas><span class="cross-lens-zero">0</span><span class="cross-lens-caption">SEVEN DAYS, MAGNIFIED · FULL WINDOW</span></div>
+      <div class="cross-lens"><canvas width="680" height="280" data-cross-cohort="${moment.id}" aria-label="Cross-ideology arrivals during this seven-day window, magnified."></canvas><span class="cross-lens-zero">0</span><span class="cross-lens-caption">SEVEN DAYS, MAGNIFIED · FULL WINDOW</span></div>
       <p class="cross-measure">Cross-ideology share of scored newcomers</p>
       ${bar('Prior 28 days', moment.baselineShare)}${bar('This week', moment.share)}
       <p class="cross-difference">+${(moment.shareChange * 100).toFixed(1)} percentage points <span>· ${moment.rateRatio.toFixed(1)}× the prior daily arrival rate</span></p>
       <div class="cross-days" role="group" aria-label="Cross-ideology arrivals on each day of this week">${moment.daily.map(row => `<button type="button" data-cross-day="${row[0]}" style="--bar:${row[3] / peak * 100}%" aria-label="Explore ${crossDate(row[0])}: ${number.format(row[3])} cross-ideology arrivals" title="${crossDate(row[0])} · ${number.format(row[3])} arrivals"><span>${row[0].slice(8)}</span><i></i></button>`).join('')}</div>
       <p class="cross-peak">Peak · ${crossDate(moment.peakDate)} · ${number.format(moment.peakCross)} arrivals</p>
-      <button class="cross-toggle" type="button" data-cross-toggle aria-pressed="true">Spotlight on · show everyone ↗</button>
+      <button class="cross-toggle" type="button" data-cross-toggle aria-pressed="true">Cross-ideology only · show everyone ↗</button>
     </figure>
     <p class="aside-note">${moment.context}</p>
     <a class="cross-source" href="${moment.source}" target="_blank" rel="noopener noreferrer">${moment.sourceName} ↗</a>

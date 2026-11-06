@@ -71,11 +71,23 @@ export function viewWindow(series, day, zoom, storyStart, storyEnd = series.end)
 }
 
 export function makeTimeScale(start, end, day, mode) {
-  const split = dayNumber('2023-01-01');
-  const focus = mode === 'story' && start < split && end > split
-    ? clamp((day - split) / 30, 0, 1) : 0;
+  let split = dayNumber('2023-01-01');
+  const automatic = mode === 'story' && start < split && end > split;
+  const focus = automatic ? clamp((day - split) / 30, 0, 1) : 0;
   const naturalShare = (split - start) / (end - start);
-  const share = focus ? naturalShare + (0.22 - naturalShare) * focus : null;
+  let share = focus ? naturalShare + (0.22 - naturalShare) * focus : null;
+  if (automatic && end > dayNumber('2023-03-01')) {
+    const smooth = value => { const x = clamp(value, 0, 1); return x * x * (3 - 2 * x); };
+    const march = dayNumber('2023-03-01'), campaign = smooth((day - march) / 7);
+    if (campaign && campaign < 1) {
+      split += (march - split) * campaign;
+      share *= 1 - campaign;
+    } else if (campaign === 1) {
+      const ballots = smooth((day - dayNumber('2023-05-01')) / 7);
+      start = march + (Math.min(dayNumber('2023-05-07'), end - 1) - march) * ballots;
+      return { start, end, split, share: null, detail: ballots ? 'ballots' : 'campaign' };
+    }
+  }
   return { start, end, split, share };
 }
 

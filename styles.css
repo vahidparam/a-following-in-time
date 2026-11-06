@@ -50,6 +50,12 @@ button{color:inherit}
 .portrait-choice:hover .portrait-name strong,.portrait-choice[aria-pressed=true] .portrait-name strong{color:var(--accent)}
 .portrait-choice[aria-pressed=true] .portrait-action{border-color:var(--accent)}
 .selection-status{font-size:10px;color:var(--quiet);min-height:16px;margin:17px 0 0}
+.story-loading{appearance:none;width:230px;height:3px;border:0;margin-top:20px;background:var(--rule);accent-color:var(--accent)}
+.story-loading[hidden]{display:none}
+.story-loading::-webkit-progress-bar{background:var(--rule)}
+.story-loading::-webkit-progress-value{background:var(--accent)}
+.story-loading::-moz-progress-bar{background:var(--accent)}
+.grid-line.is-daily{opacity:.4}
 .story-layout[hidden]{display:none}
 .origin-note{margin:0 0 24px;max-width:360px}
 .translation a{text-decoration:none;color:var(--muted);white-space:nowrap;margin-left:5px}

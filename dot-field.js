@@ -1,5 +1,5 @@
 import { countAt, dailyCount, makePointDays, timePosition } from './story-data.mjs';
-import { DENSITY_ROWS, IDEOLOGY_BINS, IDEOLOGY_LIMIT, ideologyPosition, makeIdeologyDensity } from './ideology.mjs';
+import { DENSITY_ROWS, IDEOLOGY_BINS, IDEOLOGY_LIMIT, crossIndices, lowerBound, ideologyPosition, makeIdeologyDensity } from './ideology.mjs';
 
 const vertexSource = `#version 300 es
 precision highp float;
@@ -96,6 +96,7 @@ export class DotField {
     this.uniforms = Object.fromEntries(['uStart', 'uSpan', 'uPointSize', 'uAlpha', 'uSplit', 'uShare', 'uIdeologyExtent', 'uFocusStart', 'uFocusEnd', 'uCrossSign', 'uFocusMix'].map(name => [name, gl.getUniformLocation(this.program, name)]));
     this.buffer = gl.createBuffer();
     this.scoreBuffer = gl.createBuffer();
+    this.focusBuffer = gl.createBuffer();
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     gl.clearColor(0, 0, 0, 0);
@@ -103,6 +104,7 @@ export class DotField {
 
   setSeries(series) {
     this.series = series;
+    this.focusKey = null;
     if (this.lost) return;
     if (!this.gl) {
       series.ideologyDensity ||= makeIdeologyDensity(series);
@@ -140,6 +142,21 @@ export class DotField {
     const first = countAt(this.series, start - 1);
     const last = Math.min(revealed, countAt(this.series, Math.min(day, end - 1)));
     const visible = Math.max(0, last - first);
+    let selected;
+    if (focus) {
+      const key = `${focus.start}-${focus.end}-${focus.sign}`;
+      if (this.focusKey !== key) {
+        this.focusKey = key;
+        this.focusPoints = crossIndices(this.series, focus);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.focusBuffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.focusPoints, gl.STATIC_DRAW);
+      }
+      selected = this.focusPoints;
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.focusBuffer);
+    }
+    const draw = (from, to) => selected
+      ? gl.drawElements(gl.POINTS, Math.max(0, lowerBound(selected, to) - lowerBound(selected, from)), gl.UNSIGNED_INT, lowerBound(selected, from) * 4)
+      : gl.drawArrays(gl.POINTS, from, Math.max(0, to - from));
     gl.viewport(0, 0, width, height);
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.uniform1f(this.uniforms.uStart, start - this.series.start);
@@ -152,13 +169,14 @@ export class DotField {
     gl.uniform1f(this.uniforms.uCrossSign, focus?.sign ?? 0);
     gl.uniform1f(this.uniforms.uFocusMix, focus?.mix ?? 0);
     gl.uniform1f(this.uniforms.uPointSize, ratio * 1.3);
-    gl.uniform1f(this.uniforms.uAlpha, Math.min(0.95, Math.max(0.008, width * height / (visible * ratio * ratio) * 0.35)));
-    gl.drawArrays(gl.POINTS, first, visible);
+    const population = selected ? lowerBound(selected, last) - lowerBound(selected, first) : visible;
+    gl.uniform1f(this.uniforms.uAlpha, Math.min(0.95, Math.max(0.008, width * height / (population * ratio * ratio) * 0.35)));
+    draw(first, last);
     // The current day's points are brighter; the previous days remain in place.
     if (day >= start && day < end) {
       gl.uniform1f(this.uniforms.uAlpha, 0.7);
       const earlier = countAt(this.series, day - 1);
-      gl.drawArrays(gl.POINTS, earlier, Math.max(0, Math.min(dailyCount(this.series, day), revealed - earlier)));
+      draw(earlier, Math.max(earlier, Math.min(countAt(this.series, day), revealed)));
     }
   }
 
@@ -169,7 +187,7 @@ export class DotField {
     context.clearRect(0, 0, width, height);
     const extent = IDEOLOGY_LIMIT;
     context.fillStyle = '#ffffff';
-    for (let date = Math.max(start, this.series.start); date <= Math.min(day, end - 1, this.series.end); date++) {
+    for (let date = Math.max(Math.floor(start), this.series.start); date <= Math.min(day, end - 1, this.series.end); date++) {
       const x = timePosition(date, scale) * width;
       const barWidth = timePosition(date + 1, scale) * width - x;
       for (let bin = 0; bin < DENSITY_ROWS; bin++) {
@@ -177,12 +195,9 @@ export class DotField {
         const count = this.series.ideologyDensity[(date - this.series.start) * DENSITY_ROWS + bin] * fraction;
         if (!count) continue;
         const score = bin === IDEOLOGY_BINS ? 0 : bin > IDEOLOGY_BINS ? NaN : ((bin + 0.5) / IDEOLOGY_BINS * 2 - 1) * extent;
+        if (focus && !(date >= focus.start && date < focus.end && score * focus.sign > 0)) continue;
         const cellHeight = bin < IDEOLOGY_BINS ? height * 0.82 / IDEOLOGY_BINS : Math.max(1, height * 0.015);
         context.globalAlpha = Math.min(0.9, Math.log1p(count) / 10);
-        if (focus) {
-          const selected = date >= focus.start && date < focus.end && score * focus.sign > 0;
-          context.globalAlpha *= 1 + ((selected ? 1 : 0.5) - 1) * focus.mix;
-        }
         context.fillRect(x, ideologyPosition(score) * height - cellHeight / 2, Math.max(1, barWidth), cellHeight);
       }
     }
