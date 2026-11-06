@@ -1,3 +1,6 @@
+import { countAt } from './story-data.mjs';
+import { loadCompressed } from './story-loading.mjs';
+
 export const IDEOLOGY_ZERO = 0.46;
 export const IDEOLOGY_SPAN = 0.41;
 export const MISSING_Y = 0.97;
@@ -78,6 +81,3 @@ export function makeIdeologyDensity(series) {
   });
   return density;
 }
-import { countAt } from './story-data.mjs';
-import { loadCompressed } from './story-loading.mjs';
-

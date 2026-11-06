@@ -15,6 +15,7 @@ const monthFormat = new Intl.DateTimeFormat('en-GB', { month: 'short', timeZone:
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 let series, candidates, field, context, day, anchors = [], frame = 0, playing = false, playFrame = 0, lastRender = '';
 let selectedDay = null, selectedScroll = 0;
+let seekSettling = 0;
 let plotScale;
 let candidateRequest = 0;
 let displayTime, motion = null, lastPaint = -Infinity, pendingScroll = null;
@@ -24,7 +25,7 @@ let bothMetadata, bothStory;
 
 function measure() {
   if (!chapters.length) return;
-  const focus = innerWidth <= 700 ? $('chart-account').closest('.visual-panel').getBoundingClientRect().bottom + 20 : innerHeight * 0.35;
+  const focus = innerWidth <= 700 ? 80 + $('chart-account').closest('.visual-panel').getBoundingClientRect().height : innerHeight * 0.35;
   const beginning = $('story').getBoundingClientRect().top + scrollY - (innerWidth <= 700 ? 60 : 80);
   anchors = chapters.map((chapter, index) => Math.round(index ? chapter.querySelector('.eyebrow').getBoundingClientRect().top + scrollY - focus : beginning));
   anchors.push(Math.round(chapters.at(-1).getBoundingClientRect().bottom + scrollY - focus));
@@ -44,6 +45,7 @@ function seek(date, smooth = false) {
   const top = clamp(anchors[index] + (anchors[index + 1] - anchors[index]) * (position - index), 0, document.documentElement.scrollHeight - innerHeight);
   // Scroll positions round to pixels; preserve the exact day chosen on the slider.
   selectedDay = date;
+  seekSettling = 2;
   pendingScroll = smooth && !reducedMotion.matches ? Math.round(top) : null;
   scrollTo({ top, behavior: pendingScroll === null ? 'instant' : 'smooth' });
   selectedScroll = scrollY;
@@ -58,6 +60,7 @@ function schedule() {
 function update(timestamp) {
   frame = 0;
   if (!series) return;
+  if (seekSettling) { selectedScroll = scrollY; seekSettling--; }
   motionClock += lastFrameTime === null ? 0 : clamp(timestamp - lastFrameTime, 0, 50);
   lastFrameTime = timestamp;
   const target = (selectedDay ?? dayAtProgress(stops, scrollProgress())) + 1;
@@ -74,44 +77,52 @@ function update(timestamp) {
   day = state.day;
   const count = Math.floor(state.count + 1e-6);
   const zoom = $('zoom').value;
-  const [viewStart, viewEnd] = viewWindow(series, day, zoom, plotStart, lastDay);
-  plotScale = makeTimeScale(viewStart, viewEnd, displayTime - 1, zoom);
-  const key = `${series.handle}-${displayTime.toFixed(5)}-${count}-${viewStart}-${viewEnd}-${zoom}`;
-  if (key === lastRender) { if (progress < 1) schedule(); return; }
+  const view = viewWindow(series, day, zoom, plotStart, lastDay);
+  plotScale = makeTimeScale(...view, displayTime - 1, zoom);
+  const { start: viewStart, end: viewEnd } = plotScale;
+  const key = `${series.handle}-${day}-${displayTime.toFixed(5)}-${count}-${viewStart}-${viewEnd}-${zoom}`;
+  if (key === lastRender) { if (progress < 1 || seekSettling) schedule(); return; }
   lastRender = key;
   lastPaint = timestamp;
   $('plot-tooltip').hidden = true;
   $('follow-count').value = number.format(count);
   $('current-date').textContent = dateFormat.format(day * DAY);
   $('current-date').dateTime = isoDay(day);
+  const focus = cross.draw(displayTime, plotScale);
   $('count-caption').textContent = day > series.end
     ? `last observed total · ${dateFormat.format(series.end * DAY)}`
-    : 'recorded relationships up to this day';
+    : focus ? 'total recorded relationships · filtered plot' : 'recorded relationships up to this day';
   const controlDay = selectedDay ?? day;
   $('timeline').value = controlDay;
   $('timeline').setAttribute('aria-valuetext', `${dateFormat.format(controlDay * DAY)}; ${number.format(selectedDay === null ? count : countAt(series, controlDay))} recorded relationships`);
   $('reading-progress').style.width = `${clamp((day - firstDay) / (lastDay - firstDay), 0, 1) * 100}%`;
   $('empty-state').hidden = count > 0;
   $('time-cursor').style.left = `${clamp(timePosition(displayTime, plotScale), 0, 1) * 100}%`;
-  $('scale-note').textContent = plotScale.share !== null ? '2023 expanded · alignment clipped at ±1.5'
+  $('scale-note').textContent = plotScale.detail ? `${plotScale.detail === 'ballots' ? 'Election weeks' : 'March–May 2023'} · daily grid`
+    : plotScale.share !== null ? '2023 expanded · alignment clipped at ±1.5'
     : !field.gl ? 'Ideology density · brighter means more accounts'
       : 'Alignment clipped at −1.5 and +1.5';
   $('axis-break').hidden = plotScale.share === null;
   $('axis-break').style.left = `${(plotScale.share || 0) * 100}%`;
   drawAxis(plotScale);
-  field.draw(day, plotScale, count, cross.draw(displayTime, plotScale));
-  context.draw(series, day, plotScale, cross.active);
+  field.draw(day, plotScale, count, focus);
+  context.draw(series, day, plotScale, cross.active, Boolean(focus));
   $('plot').dataset.start = viewStart;
   $('plot').dataset.end = viewEnd;
-  if (progress < 1) schedule();
+  if (progress < 1 || seekSettling) schedule();
 }
 
-function axisTicks({ start, end, share }) {
+function axisTicks({ start, end, share, detail }) {
   const zoom = $('zoom').value;
   const firstYear = new Date(start * DAY).getUTCFullYear();
   const lastYear = new Date((end - 1) * DAY).getUTCFullYear();
   let ticks = [{ day: start, label: zoom === 'day' ? dateFormat.format(start * DAY) : String(firstYear) }];
-  if (zoom === 'campaign' || share !== null) {
+  if (detail) {
+    const step = end - start <= 35 ? (innerWidth <= 700 ? 3 : 2) : (innerWidth <= 700 ? 14 : 7);
+    ticks = [];
+    for (let day = Math.ceil(start); day < end; day += step) ticks.push({ day, label: dateFormat.format(day * DAY).slice(0, 6) });
+    ticks.push({ day: end, label: dateFormat.format((end - 1) * DAY).slice(0, 6) });
+  } else if (zoom === 'campaign' || share !== null) {
     ticks = [1, 2, 3, 4, 5].map(month => {
       const day = dayNumber(`2023-${String(month).padStart(2, '0')}-01`);
       return { day, label: monthFormat.format(day * DAY) };
@@ -143,6 +154,11 @@ function drawAxis(scale) {
   });
   $('year-axis').innerHTML = ticks.map(tick => `<span style="left:${timePosition(tick.day, scale) * 100}%">${tick.label}</span>`).join('');
   $('plot-grid').innerHTML = ticks.map(tick => `<span class="grid-line" style="left:${timePosition(tick.day, scale) * 100}%"></span>`).join('');
+  if (scale.detail) {
+    const lines = [];
+    for (let date = Math.ceil(scale.start); date < scale.end; date++) lines.push(`<span class="grid-line is-daily" style="left:${timePosition(date, scale) * 100}%"></span>`);
+    $('plot-grid').insertAdjacentHTML('afterbegin', lines.join(''));
+  }
 }
 
 function stopPlaying() {
@@ -214,9 +230,22 @@ function prepareStory(key, next, initialDate) {
   context.draw(next, day, plotScale);
   $('axis-break').hidden = true;
   $('time-cursor').style.left = `${timePosition(day + 1, plotScale) * 100}%`;
-  if (initialDate !== undefined) seek(initialDate);
-  else scrollTo({ top: anchors[0], behavior: reducedMotion.matches ? 'instant' : 'smooth' });
+  seek(initialDate ?? firstDay, initialDate === undefined);
   $('score-coverage').textContent = `Loading ${next.name}’s political alignment scores…`;
+}
+
+function loadingProgress(key, request) {
+  const waiting = key === 'both' ? !bothStory?.data : !candidates[key].scores;
+  $('story-loading').hidden = !waiting;
+  $('story-loading').value = 0;
+  if (waiting) scrollTo({ top: 0, behavior: 'instant' });
+  const label = key === 'both' ? 'the shared audience' : `${STORIES[key].shortName}’s audience`;
+  $('selection-status').textContent = `Preparing ${label}…`;
+  return (received, total) => {
+    if (request !== candidateRequest) return;
+    $('story-loading').value = total ? Math.min(1, received / total) : 0;
+    $('selection-status').textContent = `Loading ${label} · ${(received / 1048576).toFixed(1)}${total ? ` / ${(total / 1048576).toFixed(1)}` : ''} MB`;
+  };
 }
 
 async function chooseCandidate(key, initialDate) {
@@ -226,38 +255,47 @@ async function chooseCandidate(key, initialDate) {
   series = null;
   field.clear();
   bothStory?.hide();
-  if (key === 'both') {
-    $('story').hidden = true;
-    document.body.dataset.story = 'both';
-    document.title = 'One audience, two clocks — Follow Motivations';
-    document.querySelectorAll('[data-enter-story]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.enterStory === key)));
-    $('selection-status').textContent = `Opening ${number.format(bothMetadata.total)} shared users’ story…`;
-    const { BothStory } = await import('./both-story.js');
+  $('story').hidden = true;
+  document.body.dataset.story = key;
+  document.querySelectorAll('[data-enter-story]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.enterStory === key)));
+  const progress = loadingProgress(key, request);
+  try {
+    if (key === 'both') {
+      document.title = 'One audience, two clocks — Follow Motivations';
+      $('selection-status').textContent = `Opening ${number.format(bothMetadata.total)} shared users’ story…`;
+      const { BothStory } = await import('./both-story.js');
+      if (request !== candidateRequest) return;
+      bothStory ||= new BothStory($('both-story'), bothMetadata);
+      await bothStory.prepare(progress);
+      if (request !== candidateRequest) return;
+      $('story-loading').hidden = true;
+      await bothStory.open();
+      if (request === candidateRequest) $('selection-status').textContent = 'Selected: the shared audience. Choose any of the three stories.';
+      return;
+    }
+    await loadIdeology(next, progress);
     if (request !== candidateRequest) return;
-    bothStory ||= new BothStory($('both-story'), bothMetadata);
-    await bothStory.open();
-    if (request === candidateRequest) $('selection-status').textContent = 'Selected: the shared audience. Choose any of the three stories.';
-    return;
+    $('story-loading').hidden = true;
+    prepareStory(key, next, initialDate);
+    series = next;
+    field.setSeries(series);
+    cross.setSeries(series);
+    $('start-year').textContent = key === 'rte' ? '2009' : '2010';
+    $('timeline').min = plotStart;
+    $('timeline').max = lastDay;
+    $('play').disabled = $('timeline').disabled = false;
+    $('coverage-note').textContent = `${number.format(series.total)} recorded relationships · ${series.firstDay} → ${series.lastDay}`;
+    $('score-coverage').textContent = `Political alignment: ${number.format(series.ideology.scored)} scored · ${number.format(series.ideology.missing)} without a score`;
+    $('ideology-max').textContent = `+${IDEOLOGY_LIMIT}`;
+    $('ideology-min').textContent = `−${IDEOLOGY_LIMIT}`;
+    $('selection-status').textContent = `Selected: ${activeStory.name}. Choose any of the three stories.`;
+    lastRender = '';
+    measure();
+    const heading = initialDate === undefined ? $('story-title') : [...document.querySelectorAll('.cross-chapter')].find(chapter => dayNumber(chapter.dataset.from) === initialDate)?.querySelector('h2');
+    heading?.focus({ preventScroll: true });
+  } catch (error) {
+    if (request === candidateRequest) scoreError(error);
   }
-  prepareStory(key, next, initialDate);
-  await loadIdeology(next);
-  if (request !== candidateRequest) return;
-  series = next;
-  field.setSeries(series);
-  cross.setSeries(series);
-  $('start-year').textContent = key === 'rte' ? '2009' : '2010';
-  $('timeline').min = plotStart;
-  $('timeline').max = lastDay;
-  $('play').disabled = $('timeline').disabled = false;
-  $('coverage-note').textContent = `${number.format(series.total)} recorded relationships · ${series.firstDay} → ${series.lastDay}`;
-  $('score-coverage').textContent = `Political alignment: ${number.format(series.ideology.scored)} scored · ${number.format(series.ideology.missing)} without a score`;
-  $('ideology-max').textContent = `+${IDEOLOGY_LIMIT}`;
-  $('ideology-min').textContent = `−${IDEOLOGY_LIMIT}`;
-  $('selection-status').textContent = `Selected: ${activeStory.name}. Choose any of the three stories.`;
-  lastRender = '';
-  measure();
-  const heading = initialDate === undefined ? $('story-title') : [...document.querySelectorAll('.cross-chapter')].find(chapter => dayNumber(chapter.dataset.from) === initialDate)?.querySelector('h2');
-  heading?.focus({ preventScroll: true });
 }
 
 function replayStory() {
@@ -273,14 +311,14 @@ function wireControls() {
   addEventListener('scroll', () => {
     if (pendingScroll !== null) {
       if (Math.abs(scrollY - pendingScroll) <= 1) { pendingScroll = null; selectedScroll = scrollY; }
-    } else if (scrollY !== selectedScroll) selectedDay = null;
+    } else if (!seekSettling && scrollY !== selectedScroll) selectedDay = null;
     schedule();
   }, { passive: true });
   addEventListener('resize', measure);
   document.addEventListener('toggle', event => { if (event.target.matches('.cross-method')) measure(); }, true);
   for (const event of ['wheel', 'touchstart', 'keydown']) addEventListener(event, () => {
     stopPlaying();
-    if (pendingScroll !== null) { pendingScroll = null; selectedDay = null; schedule(); }
+    pendingScroll = null; selectedDay = null; seekSettling = 0; schedule();
   }, { passive: true });
   document.addEventListener('visibilitychange', () => { if (document.hidden) stopPlaying(); });
   $('timeline').addEventListener('input', event => { stopPlaying(); seek(Number(event.target.value)); });
@@ -320,6 +358,7 @@ function wireControls() {
 
 function scoreError(error) {
   console.error(error);
+  $('story-loading').hidden = true;
   if (document.body.dataset.story === 'both') {
     $('selection-status').textContent = 'Could not open the paired clocks. Select Both to try again.';
     const status = $('both-renderer-status');

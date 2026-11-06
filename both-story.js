@@ -2,6 +2,7 @@ import { clamp, dayNumber } from './story-data.mjs';
 import { calendarPosition, decodePairs, gapLabel, pairDate, pairPosition, selectedTotals } from './both-data.mjs';
 import { BOTH_EVENTS, mountBothStory } from './both-content.mjs';
 import { BothField } from './both-field.js';
+import { loadCompressed } from './story-loading.mjs';
 
 const number = new Intl.NumberFormat('en-US');
 const date = value => new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(Date.parse(`${value}T00:00:00Z`));
@@ -30,8 +31,7 @@ export class BothStory {
     this.measure(); this.seek(0);
     this.drawExample(); this.labels(0, 1, { different: false, campaign: false }); this.axes(0);
     this.$('both-title').focus({ preventScroll: true });
-    if (!this.dataPromise) this.dataPromise = this.load().catch(error => { this.dataPromise = null; throw error; });
-    this.data = await this.dataPromise;
+    this.data = await this.prepare();
     if (!this.active || generation !== this.generation) return;
     this.field.setData(this.data);
     this.root.setAttribute('aria-busy', 'false');
@@ -39,11 +39,11 @@ export class BothStory {
     this.lastTime = null; this.lastKey = ''; this.measure(); this.schedule();
   }
 
-  async load() {
-    const response = await fetch(new URL(`./data/${this.meta.file}`, import.meta.url));
-    if (!response.ok) throw new Error(`Paired clocks request returned ${response.status}`);
-    const stream = response.body.pipeThrough(new DecompressionStream('gzip'));
-    return decodePairs(await new Response(stream).arrayBuffer(), this.meta);
+  prepare(progress) {
+    if (progress) this.loadProgress = progress;
+    if (!this.dataPromise) this.dataPromise = loadCompressed(new URL(`./data/${this.meta.file}`, import.meta.url), this.meta.compressedBytes, (...args) => this.loadProgress?.(...args))
+      .then(buffer => decodePairs(buffer, this.meta)).catch(error => { this.dataPromise = null; throw error; });
+    return this.dataPromise;
   }
 
   hide() {
