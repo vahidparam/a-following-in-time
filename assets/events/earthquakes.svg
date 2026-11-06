@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 440" fill="none">
+<rect width="720" height="440" fill="#111411"/>
+<g stroke="#596152" stroke-width="1"><path d="M0 110h720M0 220h720M0 330h720M120 0v440M240 0v440M360 0v440M480 0v440M600 0v440" stroke-dasharray="2 8"/><circle cx="280" cy="220" r="140"/><circle cx="280" cy="220" r="95"/><circle cx="280" cy="220" r="50"/><circle cx="445" cy="192" r="118"/><circle cx="445" cy="192" r="74"/><circle cx="445" cy="192" r="31"/></g>
+<path d="M36 244h154l22-20 22 39 24-112 24 169 24-96 24 20h63l16-18 18 28 18-78 18 108 18-58 18 18h166" stroke="#d7e6aa" stroke-width="3"/>
+<g fill="#eeede6"><circle cx="280" cy="220" r="5"/><circle cx="445" cy="192" r="5"/></g>
+<text x="36" y="393" fill="#a3a6a0" font-family="Arial,sans-serif" font-size="13" letter-spacing="4">06.02.2023</text>
+</svg>

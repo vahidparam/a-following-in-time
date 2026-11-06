@@ -1,0 +1,33 @@
+# Publish only the website. Everything else stays local by default.
+/*
+!/.gitignore
+!/.gitattributes
+!/.nojekyll
+!/AGENTS.md
+!/README.md
+!/PUBLISHING.md
+!/index.html
+!/*.css
+!/*.js
+!/*.mjs
+
+# Public images, illustrations, and their credits.
+!/assets/
+/assets/*
+!/assets/CREDITS.md
+!/assets/*.jpg
+!/assets/*.svg
+!/assets/events/
+/assets/events/*
+!/assets/events/*.svg
+!/assets/events/*.webp
+
+# Only the six anonymous data files required by the browser.
+!/data/
+/data/*
+!/data/followers.json
+!/data/cross-ideology.json
+!/data/both.json
+!/data/kk-ideology0.f32.gz
+!/data/rte-ideology0.f32.gz
+!/data/both-pairs.u16i32.gz

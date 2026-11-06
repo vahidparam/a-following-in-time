@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 440" fill="none">
+<rect width="720" height="440" fill="#111411"/>
+<g stroke="#596152" stroke-width="2"><path d="m88 277 90-40 90 40M104 280v58m33-58v58m41-58v58m41-58v58m33-58v58M82 340h192"/><path d="M274 301h55m62 0h55" stroke-dasharray="3 8"/></g>
+<path d="M324 78h250l54 54v206H324zM574 78v54h54" stroke="#eeede6" stroke-width="2"/><path d="M365 146h166M365 164h123" stroke="#6c716c" stroke-width="2"/>
+<g stroke="#d7e6aa" stroke-width="2"><circle cx="402" cy="245" r="28"/><circle cx="550" cy="245" r="28"/></g><path d="M476 201v89" stroke="#596152" stroke-dasharray="2 7"/>
+<text x="36" y="393" fill="#a3a6a0" font-family="Arial,sans-serif" font-size="13" letter-spacing="4">16.04.2017</text>
+</svg>

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 440" fill="none">
+<rect width="720" height="440" fill="#111411"/>
+<path d="M42 334h164m308 0h164M122 94h92m292 0h92" stroke="#596152" stroke-width="2" stroke-dasharray="2 9"/>
+<g stroke="#eeede6" stroke-width="2"><path d="M219 157h282v181H219zM204 157l156-76 156 76zM330 252h60v86m-30-86v86"/><circle cx="360" cy="124" r="13"/><path d="M360 114v11l7 4M249 188h33v33h-33zm72 0h33v33h-33zm72 0h33v33h-33zm72 0h14v33h-14zM249 252h33v33h-33zm183 0h33v33h-33z" stroke="#6c716c"/></g>
+<path d="M333 286h54" stroke="#d7e6aa" stroke-width="4"/><rect x="346" y="277" width="28" height="19" fill="#111411" stroke="#d7e6aa" stroke-width="2"/>
+<text x="36" y="393" fill="#a3a6a0" font-family="Arial,sans-serif" font-size="13" letter-spacing="4">16.03.2020</text>
+</svg>

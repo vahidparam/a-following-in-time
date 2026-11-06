@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 440" fill="none">
+<rect width="720" height="440" fill="#111411"/>
+<g stroke="#6c716c" stroke-width="2"><path d="m78 221 30-26h126l30 26v109H78zM78 221h186M137 209h68"/><path d="m143 115 72 18-20 77-72-18z"/></g>
+<path d="M270 213c93-160 113-160 206-18" stroke="#d7e6aa" stroke-width="2" stroke-dasharray="3 8"/>
+<g stroke="#eeede6" stroke-width="2"><path d="m456 221 30-26h126l30 26v109H456zM456 221h186M515 209h68"/><path d="m521 115 72 18-20 77-72-18z"/></g>
+<g fill="#d7e6aa" font-family="Georgia,serif" font-size="42"><text x="154" y="291">I</text><text x="526" y="291">II</text></g>
+<g fill="#a3a6a0" font-family="Arial,sans-serif" font-size="13" letter-spacing="3"><text x="110" y="378">14 MAY</text><text x="490" y="378">28 MAY</text></g>
+</svg>

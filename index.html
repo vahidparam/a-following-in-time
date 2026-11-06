@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080909">
+  <meta name="author" content="Vahid Khalili Param">
+  <meta name="description" content="Three stories: Kılıçdaroğlu, Erdoğan, and the shared audience. Explore follow dates, political alignment, and the two clocks of users recorded in both audiences.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="A following, in time — Follow Motivations">
+  <meta property="og:description" content="Two politicians. Three stories. Explore the audiences of Kılıçdaroğlu and Erdoğan, and the 5.5 million accounts that connect them.">
+  <meta name="twitter:card" content="summary">
+  <title>A following, in time — Follow Motivations</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="both.css">
+  <script type="module" src="story.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#choose">Skip to politician choices</a>
+  <header class="masthead">
+    <a class="wordmark" href="#top" aria-label="Follow Motivations, back to beginning"><span class="brand-dots" aria-hidden="true">⠿</span> FOLLOW<span>MOTIVATIONS</span></a>
+    <span class="edition">A FOLLOWING, IN TIME</span>
+    <a class="text-link" href="#method">About the data <span aria-hidden="true">↗</span></a>
+    <div class="reading-progress" aria-hidden="true"><span id="reading-progress"></span></div>
+  </header>
+
+  <main id="top">
+    <section class="story-selector" id="choose" aria-labelledby="selection-title">
+      <p class="eyebrow"><span class="small-line"></span> TWO POLITICIANS. THREE STORIES.</p>
+      <h1 id="selection-title">Whose crowd<br>will you <em>follow?</em></h1>
+      <p class="selection-intro">Follow one politician’s audience. Or meet the people who connect them both.</p>
+      <div class="portrait-choices">
+        <button class="portrait-choice" type="button" data-enter-story="kk" aria-pressed="false" disabled>
+          <span class="portrait-frame"><img src="assets/kemal-kilicdaroglu.jpg" width="244" height="322" alt="Kemal Kılıçdaroğlu"><span class="portrait-code" aria-hidden="true">KK</span></span>
+          <span class="portrait-name">Kemal <strong>Kılıçdaroğlu</strong></span><span class="portrait-action">EXPLORE HIS STORY <span aria-hidden="true">↘</span></span>
+        </button>
+        <button class="portrait-choice" type="button" data-enter-story="rte" aria-pressed="false" disabled>
+          <span class="portrait-frame"><img src="assets/recep-tayyip-erdogan.jpg" width="705" height="939" alt="Recep Tayyip Erdoğan"><span class="portrait-code" aria-hidden="true">RTE</span></span>
+          <span class="portrait-name">Recep Tayyip <strong>Erdoğan</strong></span><span class="portrait-action">EXPLORE HIS STORY <span aria-hidden="true">↘</span></span>
+        </button>
+        <button class="portrait-choice both-choice" type="button" data-enter-story="both" aria-pressed="false" disabled>
+          <span class="portrait-frame both-portraits"><img src="assets/kemal-kilicdaroglu.jpg" width="244" height="322" alt="Kılıçdaroğlu"><img src="assets/recep-tayyip-erdogan.jpg" width="705" height="939" alt="Erdoğan"><span class="portrait-code" aria-hidden="true">KK ∩ RTE</span></span>
+          <span class="portrait-name"><span id="both-selection-count">The shared audience</span><strong>Both</strong></span><span class="portrait-action">ONE USER. TWO FOLLOW DATES. <span aria-hidden="true">↘</span></span>
+        </button>
+      </div>
+      <p class="selection-status" id="selection-status" role="status">Loading the three audiences…</p>
+    </section>
+    <div class="story-layout" id="story" hidden>
+      <aside class="visual-panel" aria-label="Interactive follower timeline">
+        <div class="chart-heading">
+          <div><p class="eyebrow">FOLLOW DATE × POLITICAL ALIGNMENT</p><p class="chart-account" id="chart-account">@kilicdarogluk</p></div>
+          <span class="live-label"><span></span> SCROLL TO REVEAL</span>
+        </div>
+        <div class="chart-stat">
+          <div><output id="follow-count">—</output><p id="count-caption">recorded relationships up to this day</p></div>
+          <div class="date-block"><time id="current-date" datetime="2010-06-10">10 Jun 2010</time><span>STORY DATE · UTC</span></div>
+        </div>
+        <div class="plot" id="plot">
+          <canvas id="followers" aria-label="White dots show estimated follow dates on X and ideology dimension 0 on Y. Positive scores above zero indicate right-leaning users closer to Erdoğan; negative scores below zero indicate users closer to Kılıçdaroğlu. Zero is the scale reference. Missing scores have a separate band."></canvas>
+          <div class="plot-grid" id="plot-grid" aria-hidden="true"></div>
+          <div class="ideology-axis" aria-hidden="true"><span id="ideology-max" style="top:5%">+1.5</span><span style="top:46%">0</span><span id="ideology-min" style="top:87%">−1.5</span></div>
+          <div class="ideology-guide" aria-hidden="true"><span class="ideology-positive"><b>↑ + Right-leaning</b>Closer to Erdoğan</span><span class="ideology-negative"><b>↓ − Negative scores</b>Closer to Kılıçdaroğlu</span></div>
+          <div class="ideology-zero" id="ideology-zero" aria-hidden="true"><span>0 · SCALE REFERENCE</span></div>
+          <div class="missing-score-band" aria-hidden="true"><span>NO SCORE</span></div>
+          <div class="axis-break" id="axis-break" aria-hidden="true" hidden></div>
+          <div class="data-gap" id="data-gap" hidden><span>NO FOLLOW ESTIMATES</span></div>
+          <div class="time-cursor" id="time-cursor" aria-hidden="true"><span></span></div>
+          <div class="plot-events" id="plot-events" role="group" aria-label="Political events on the timeline"></div>
+          <div class="cross-windows" id="cross-windows" role="group" aria-label="Cross-ideology arrival windows"></div>
+          <div class="empty-state" id="empty-state"><span class="empty-ring" aria-hidden="true"></span><p>A new account.<br>An audience still to come.</p></div>
+          <div class="plot-tooltip" id="plot-tooltip" hidden></div>
+          <div class="year-axis" id="year-axis" aria-hidden="true"></div>
+        </div>
+        <div class="plot-key"><span><i></i> ONE DOT = ONE RECORDED RELATIONSHIP</span><span id="scale-note">Dots overlap. Zoom in to see individuals.</span></div>
+        <div class="context-strip" aria-live="polite">
+          <div><time id="context-date">POLITICAL CONTEXT</time><strong id="context-title">Six moments along the way</strong><a id="context-source" target="_blank" rel="noopener noreferrer" hidden>Source ↗</a></div>
+          <p id="context-comparison">Scroll, or select a plot marker to explore a moment.</p>
+        </div>
+        <p class="renderer-status" id="renderer-status" role="status"></p>
+        <div class="timeline-controls">
+          <button class="play-button" id="play" type="button" aria-label="Play the timeline" disabled><span id="play-icon" aria-hidden="true">▶</span><span id="play-label">Play</span></button>
+          <div class="scrubber"><label class="sr-only" for="timeline">Move through the story by date</label><input id="timeline" type="range" min="0" max="1" value="0" disabled><div><span id="start-year">2010</span><span>DRAG TO TRAVEL THROUGH TIME</span><span>2023</span></div></div>
+          <label class="zoom-control"><span class="sr-only">Timeline zoom</span><select id="zoom"><option value="story">Story view</option><option value="all">Full timeline</option><option value="campaign">2023 campaign</option><option value="year">One year</option><option value="day">One day</option></select><span aria-hidden="true">⌄</span></label>
+        </div>
+        <p class="coverage-note" id="coverage-note">Loading the audience…</p>
+        <p class="score-coverage" id="score-coverage" role="status">Loading political alignment scores…</p>
+      </aside>
+
+      <article class="narrative" id="narrative"></article>
+    </div>
+    <div class="both-layout" id="both-story" hidden></div>
+
+    <footer id="method" class="method">
+      <p class="eyebrow">BEHIND THE DOTS</p>
+      <h2>A few things the<br>data can <em>tell us.</em></h2>
+      <div class="method-columns">
+        <div><h3>Reading the dots</h3><p>Each white point is a recorded relationship between one user and one politician. Its horizontal position shows the latest estimated follow date across the collected snapshots. Its height shows political alignment, measured by dimension 0 of the account’s ideology score: positive scores are right-leaning and closer to Erdoğan; negative scores are closer to Kılıçdaroğlu. Zero is the scale’s reference point.</p><p>The two individual stories share a −1.5 to +1.5 axis. Scores beyond these limits appear at the edges. Accounts without a score occupy the separate “No score” band.</p><p>In 2023, earlier years compress and the election months expand. “Full timeline” restores evenly spaced time.</p><p id="data-summary">Explore or download the daily audience counts.</p><a class="text-link" href="data/followers.json" download>Download daily counts & score coverage ↗</a></div>
+        <div><h3>Understanding the estimates</h3><p>Follow times are estimates grouped into UTC days; spacing within each day spreads out overlapping dots. Ideology is estimated at account level and does not measure a user’s alignment at the time they followed. The view does not reconstruct unfollows or live follower totals. Hatching marks dates beyond the 26 May 2023 data cutoff.</p><p>Event comparisons show the average daily count in the seven days before an event and the seven days beginning on its date. Incomplete windows are not compared. Events provide context, not causal evidence; following does not establish political support or individual motives.</p></div>
+        <div><h3>Sources & images</h3><p>Kılıçdaroğlu’s first post, dated 27 August 2010, is reproduced in <a href="https://www.haberturk.com/yenimedya/haber/1157323-ilk-tweetlerini-hatirliyor-musunuz" target="_blank" rel="noopener noreferrer">Habertürk’s archive</a>. His account creation date is documented in a <a href="https://katalog.marmara.edu.tr/veriler/yordambt/cokluortam/4E/3F6E482F-AF32-FA4A-A51F-C2279A3B227A.pdf#page=71" target="_blank" rel="noopener noreferrer">Marmara University thesis</a>. Erdoğan’s first personally signed tweet, on 9 February 2015, is documented in <a href="https://www.tgrthaber.com/aktuel/iste-cumhurbaskani-erdoganin-ilk-tweeti-52790" target="_blank" rel="noopener noreferrer">contemporary reporting</a>; his account had been active since 2009.</p><p>Public-domain portraits: <a href="https://commons.wikimedia.org/wiki/File:Kemal_K%C4%B1l%C4%B1%C3%A7daro%C4%9Flu_VOA_(cropped).jpg" target="_blank" rel="noopener noreferrer">Voice of America</a> and <a href="https://commons.wikimedia.org/wiki/File:Secretary_Tillerson_Meets_with_Turkish_President_Erdogan_in_Ankara_(32921677663)_(cropped)_(cropped).jpg" target="_blank" rel="noopener noreferrer">U.S. Department of State</a>. Archive photographs carry individual credits and licences. Original illustrations by Follow Motivations are symbolic depictions of the events.</p></div>
+      </div>
+      <div class="method-shared"><h3>The shared story: two clocks</h3><p>In “Both,” one point represents one shared account. The calendar map places the KK estimated UTC follow day on X and the RTE day on Y. The unfolded view places the earlier day on X and the signed gap between timestamp estimates on Y, using a logarithmic distance. Same-day estimates and equal timestamp estimates are separate categories. “Different UTC days only” sets same-day pairs aside. All accounts are anonymous. <a href="data/both.json" download>Download shared-audience counts & method ↗</a></p></div>
+      <section class="portfolio-note" id="creator" aria-labelledby="creator-title">
+        <p class="eyebrow"><span class="small-line"></span> SCIENCE COMMUNICATION · DATA-DRIVEN STORYTELLING</p>
+        <div class="portfolio-grid">
+          <div><h2 id="creator-title">Research you<br>can <em>follow.</em></h2><p class="portfolio-intro"><cite>A following, in time</cite> is a science communication project by <a href="https://vahidparam.com/" target="_blank" rel="noopener noreferrer">Vahid Khalili Param</a>. It turns research on online political audiences into a story you can explore, question, and understand through data.</p><p class="portfolio-affiliation">Vahid is a PhD candidate in Computer Science and Engineering at Sabancı University and a graduate research assistant in the VRL Lab.</p></div>
+          <nav class="portfolio-links" aria-label="Explore the creator’s portfolio and research lab">
+            <a href="https://vahidparam.com/" target="_blank" rel="noopener noreferrer"><span>THE PORTFOLIO</span><strong>Vahid Khalili Param <i aria-hidden="true">↗</i></strong><small>Research, science communication, and digital storytelling.</small></a>
+            <a href="https://varollab.com/index.html" target="_blank" rel="noopener noreferrer"><span>THE RESEARCH LAB</span><strong>VRL Lab <i aria-hidden="true">↗</i></strong><small>Computational social science at Sabancı University.</small></a>
+          </nav>
+        </div>
+        <a class="portfolio-context" href="https://varollab.com/projects/tubitak1001election.html" target="_blank" rel="noopener noreferrer">Explore the lab’s research on following political leaders and agenda setting <span aria-hidden="true">↗</span></a>
+      </section>
+      <div class="colophon"><span>FOLLOW MOTIVATIONS</span><span>A FOLLOWING, IN TIME <span class="separator">/</span> 2009—2023</span><a href="#top">BACK TO THE BEGINNING ↑</a></div>
+    </footer>
+  </main>
+  <noscript><p class="no-script">Enable JavaScript to choose a story, or <a href="data/followers.json">download the daily data</a>.</p></noscript>
+</body>
+</html>

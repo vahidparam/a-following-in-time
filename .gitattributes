@@ -1,0 +1,5 @@
+* text=auto
+*.gz binary
+*.webp binary
+*.jpg binary
+*.png binary

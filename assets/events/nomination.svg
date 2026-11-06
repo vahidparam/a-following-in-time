@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 440" fill="none">
+<rect width="720" height="440" fill="#111411"/>
+<g stroke="#6c716c" stroke-width="2"><path d="M80 90c160 0 100 130 280 130M80 142c160 0 100 78 280 78M80 194c160 0 100 26 280 26M80 246c160 0 100-26 280-26M80 298c160 0 100-78 280-78M80 350c160 0 100-130 280-130"/></g>
+<g fill="#d7e6aa"><circle cx="80" cy="90" r="6"/><circle cx="80" cy="142" r="6"/><circle cx="80" cy="194" r="6"/><circle cx="80" cy="246" r="6"/><circle cx="80" cy="298" r="6"/><circle cx="80" cy="350" r="6"/></g>
+<path d="M360 220h90" stroke="#d7e6aa" stroke-width="3"/><circle cx="510" cy="157" r="26" stroke="#eeede6" stroke-width="2"/><path d="M469 240v-23a41 41 0 0 1 82 0v23M452 240h116l-18 112h-80zM439 352h142M526 239v-26l19-14" stroke="#eeede6" stroke-width="2"/>
+<text x="36" y="393" fill="#a3a6a0" font-family="Arial,sans-serif" font-size="13" letter-spacing="4">06.03.2023</text>
+</svg>

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 440" fill="none">
+<rect width="720" height="440" fill="#111411"/>
+<g fill="#596152"><circle cx="80" cy="72" r="2"/><circle cx="170" cy="125" r="2"/><circle cx="564" cy="88" r="2"/><circle cx="645" cy="153" r="2"/></g>
+<g stroke="#6c716c" stroke-width="2"><path d="M25 304h670M110 304V178m500 126V178M25 239c57 0 85-61 85-61s135 126 250 126 250-126 250-126 28 61 85 61M150 221v83m50-44v44m50-21v21m220-21v21m50-44v44m50-83v83"/></g>
+<rect x="287" y="75" width="146" height="260" rx="16" fill="#111411" stroke="#eeede6" stroke-width="2"/><path d="M335 92h50M302 119h116v164H302z" stroke="#6c716c"/><circle cx="360" cy="168" r="25" stroke="#eeede6" stroke-width="2"/><path d="M321 250v-18a39 39 0 0 1 78 0v18" stroke="#eeede6" stroke-width="2"/><circle cx="360" cy="308" r="7" fill="#d7e6aa"/>
+<text x="36" y="393" fill="#a3a6a0" font-family="Arial,sans-serif" font-size="13" letter-spacing="4">15.07.2016</text>
+</svg>
