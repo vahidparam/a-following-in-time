@@ -14,24 +14,6 @@ Scrolling moves through time. Plot markers, playback, zoom controls, and the
 shared-audience views let readers explore the data directly. The closing section
 connects the feature to Vahid’s portfolio and the lab’s wider research.
 
-## Preview locally
-
-From this repository’s root:
-
-```bash
-python3 -m http.server 8000 --bind 127.0.0.1
-```
-
-Open `http://localhost:8000`. On a remote machine, forward the port through SSH.
-The site uses static HTML, CSS, and JavaScript: no build, package installation,
-external fonts, or runtime API is required.
-
-## Publish and update
-
-Follow [PUBLISHING.md](PUBLISHING.md) to create a GitHub repository, push these
-website files, and enable GitHub Pages. Keep asset paths relative so the site
-works within a project URL such as `/a-following-in-time/`.
-
 ## Website files
 
 | Files | Purpose |
@@ -79,14 +61,6 @@ clicks, continuous simultaneous following, or political preference.
 All estimates end on 26 May 2023. Hatching marks the unobserved period through
 the runoff on 28 May. Political events provide context, not evidence of causation.
 Detailed measurement explanations and source links appear in the website.
-
-## Repository boundary
-
-This repository contains the website only. The surrounding research workspace
-is outside the Git repository. Within this folder, the `.gitignore` excludes
-analysis reports, Python analysis/export scripts, tests, extra CSV exports,
-raw datasets, and local caches. Those files remain available locally; they are
-not part of this repository’s publication.
 
 ## Images and attribution
 
